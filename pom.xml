@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>my-kafka-transform</artifactId>
+    <version>1.0</version>
+
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <beam.version>2.58.1</beam.version>
+        <kafka.version>3.2.3</kafka.version>
+        <autovalue.version>1.10.4</autovalue.version>
+        <autovalue.service.version>1.0</autovalue.service.version>
+        <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
+    </properties>
+    <dependencies>
+        <!-- Kafka dependencies -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.beam</groupId>
+            <artifactId>beam-sdks-java-io-kafka</artifactId>
+            <version>${beam.version}</version>
+        </dependency>
+        <!-- AutoValue dependencies -->
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <version>${autovalue.version}</version>
+        </dependency>
+        <!-- Auto service used for expansion service -->
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${autovalue.service.version}</version>
+        </dependency>
+        <!-- Need to package in jar for External Transforms used by Beam's Expansion Service -->
+        <dependency>
+            <groupId>com.github.jbellis</groupId>
+            <artifactId>jamm</artifactId>
+            <version>0.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.everit.json</groupId>
+            <artifactId>org.everit.json.schema</artifactId>
+            <version>1.5.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+              Configures `mvn package` to produce a bundled jar ("fat jar") for runners
+              that require this for job submission to a cluster.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>
+                                ${project.artifactId}-bundled-${project.version}
+                            </finalName>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.apache.beam.sdk.expansion.service.ExpansionService</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
