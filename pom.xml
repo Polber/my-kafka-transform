@@ -14,23 +14,37 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <beam.version>2.58.1</beam.version>
+
+        <beam.version>2.60.0</beam.version>
         <kafka.version>3.2.3</kafka.version>
+        <google-cloud-bom.version>26.48.0</google-cloud-bom.version>
         <autovalue.version>1.10.4</autovalue.version>
         <autovalue.service.version>1.0</autovalue.service.version>
         <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>${google-cloud-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
-        <!-- Kafka dependencies -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>
-            <artifactId>beam-sdks-java-io-kafka</artifactId>
+            <artifactId>beam-sdks-java-io-expansion-service</artifactId>
             <version>${beam.version}</version>
+        </dependency>
+        <!-- Secret Manager library -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-secretmanager</artifactId>
         </dependency>
         <!-- AutoValue dependencies -->
         <dependency>
@@ -43,17 +57,6 @@
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
             <version>${autovalue.service.version}</version>
-        </dependency>
-        <!-- Need to package in jar for External Transforms used by Beam's Expansion Service -->
-        <dependency>
-            <groupId>com.github.jbellis</groupId>
-            <artifactId>jamm</artifactId>
-            <version>0.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.everit.json</groupId>
-            <artifactId>org.everit.json.schema</artifactId>
-            <version>1.5.1</version>
         </dependency>
     </dependencies>
 
